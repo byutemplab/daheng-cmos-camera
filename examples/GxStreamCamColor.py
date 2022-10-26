@@ -1,6 +1,7 @@
 # version:1.0.1905.9051
 import gxipy as gx
 from PIL import Image
+import cv2
 
 
 def main():
@@ -57,9 +58,11 @@ def main():
     # start data acquisition
     cam.stream_on()
 
+    # set up video display window without freezing the main thread
+    cv2.namedWindow("Daheng MER2", cv2.WINDOW_NORMAL)
+
     # acquisition image: num is the image number
-    num = 1
-    for i in range(num):
+    while True:
         # get raw image
         raw_image = cam.data_stream[0].get_image()
         if raw_image is None:
@@ -79,13 +82,16 @@ def main():
         if numpy_image is None:
             continue
 
-        # show acquired image
-        img = Image.fromarray(numpy_image, 'RGB')
-        img.show()
+        # show acquired in the window
+        cv2.imshow("Daheng MER2", numpy_image)
 
         # print height, width, and frame ID of the acquisition image
         print("Frame ID: %d   Height: %d   Width: %d"
               % (raw_image.get_frame_id(), raw_image.get_height(), raw_image.get_width()))
+
+        # press 'q' to exit
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     # stop data acquisition
     cam.stream_off()
